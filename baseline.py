@@ -122,7 +122,7 @@ if __name__ == "__main__":
     print(np.shape(global_features))
     with open('/home/camp/FIVR/vid2name.pk', 'rb') as pk_file:
         vid2names = pk.load(pk_file)
-    with open('/home/camp/FIVR/name2vid.pk', 'rb') as pk_file:
+    with open('/home/camp/FIVR/vid2name.pk', 'rb') as pk_file:
         name2vids = pk.load(pk_file)
     annotation_dir = '/home/camp/FIVR/annotation'
     names = np.asarray([vid2names[vid][0] for vid in vids])
