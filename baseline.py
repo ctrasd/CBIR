@@ -16,12 +16,6 @@ def read_h5file(path):
     g2 = hf.get('names')
     return g1.keys(), g1, g2
 def load_features(dataset_dir, is_gv=True):
-    '''
-    加载特征
-    :param dataset_dir: 特征所在的目录, 例如：/home/camp/FIVR/features/vcms_v1
-    :param is_gv: 是否取平均。True：返回帧平均的结果，False：保留所有帧的特征
-    :return:
-    '''
     h5_paths = glob(os.path.join(dataset_dir, '*.h5'))
     print(h5_paths)
     vid2features = {}
@@ -46,22 +40,10 @@ def load_features(dataset_dir, is_gv=True):
     else:
         return final_vids, features, vid2features
 def calculate_similarities(query_features, all_features):
-    """
-      用于计算两组特征(已经做过l2-norm)之间的相似度
-      Args:
-        queries: shape: [N, D]
-        features: shape: [M, D]
-      Returns:
-        similarities: shape: [N, M]
-    """
     similarities = []
-    # 计算待查询视频和所有视频的距离
     dist = np.nan_to_num(cdist(query_features, all_features, metric='cosine'))
     for i, v in enumerate(query_features):
-        # 归一化，将距离转化成相似度
-        # sim = np.round(1 - dist[i] / dist[i].max(), decimals=6)
         sim = 1-dist[i]
-        # 按照相似度的从大到小排列，输出index
         similarities += [[(s, sim[s]) for s in sim.argsort()[::-1] if not np.isnan(sim[s])]]
     return similarities
 def evaluateOfficial(annotations, results, relevant_labels, dataset, quiet):
@@ -134,17 +116,14 @@ relevant_labels_mapping = {
 
 if __name__ == "__main__":
     vid2features = load_features('/home/camp/FIVR/features/vcms_v1', is_gv=True)
-    # 加载特征
     vids = list(vid2features.keys())
     print(vids[:10])
     global_features = np.squeeze(np.asarray(list(vid2features.values()), np.float32))
     print(np.shape(global_features))
-    # 加载vid2name 和 name2vid
     with open('/home/camp/FIVR/vid2name.pk', 'rb') as pk_file:
         vid2names = pk.load(pk_file)
     with open('/home/camp/FIVR/name2vid.pk', 'rb') as pk_file:
         name2vids = pk.load(pk_file)
-    # 开始评估
     annotation_dir = '/home/camp/FIVR/annotation'
     names = np.asarray([vid2names[vid][0] for vid in vids])
     query_names = None
